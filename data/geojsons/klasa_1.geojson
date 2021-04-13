@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "klasa_1",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 1 }, "geometry": { "type": "MultiPolygon", "coordinates": [ [ [ [ 21.278324956210632, 52.192384369760511 ], [ 21.278378544248969, 52.192330884549854 ], [ 21.277487514603948, 52.191899372757419 ], [ 21.277436667747569, 52.191952851121904 ], [ 21.278324956210632, 52.192384369760511 ] ] ] ] } }
+]
+}
