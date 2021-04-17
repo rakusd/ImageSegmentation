@@ -12,6 +12,20 @@ def get_image_metadata_dataframe(path: str):
 
 
 def get_image_corners(img_metadata):
+    # TODO: Get exact sea level measurement
+    sea_level_point = 103
+    drone_height_above_sea_level = img_metadata.alt_geo
+    drone_height = drone_height_above_sea_level - sea_level_point
+
+    # 0 = pointing north, going clockwise
+    yaw = img_metadata['yaw[deg]']
+
+    # 0 = straight, right wing going lower
+    roll = img_metadata['roll[deg]']
+
+    # 0 = straight, plane pointing to the sky
+    pitch = img_metadata['pitch[deg]']
+
     to_modify = 0.005
     # top left corner first, then clockwise
     return Polygon([(img_metadata.longitude - to_modify, img_metadata.latitude + to_modify),
