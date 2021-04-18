@@ -112,11 +112,18 @@ def get_image_corners(img_metadata):
     
     # top left corner first, then clockwise
     # x is north in RPY coordinates therefore latitutde is added x coords
-    return Polygon([(img_metadata.longitude + longitude_factor * top_left_diff[1], img_metadata.latitude + latitude_factor * top_left_diff[0]),
-            (img_metadata.longitude + longitude_factor * top_right_diff[1], img_metadata.latitude + latitude_factor * top_right_diff[0]),
-            (img_metadata.longitude + longitude_factor * bottom_right_diff[1], img_metadata.latitude + latitude_factor * bottom_right_diff[0]),
-            (img_metadata.longitude + longitude_factor * bottom_left_diff[1], img_metadata.latitude + latitude_factor * bottom_left_diff[0]),
-            (img_metadata.longitude + longitude_factor * top_left_diff[1], img_metadata.latitude + latitude_factor * top_left_diff[0])])
+    # return Polygon([(img_metadata.longitude + longitude_factor * top_left_diff[1], img_metadata.latitude + latitude_factor * top_left_diff[0]),
+    #         (img_metadata.longitude + longitude_factor * top_right_diff[1], img_metadata.latitude + latitude_factor * top_right_diff[0]),
+    #         (img_metadata.longitude + longitude_factor * bottom_right_diff[1], img_metadata.latitude + latitude_factor * bottom_right_diff[0]),
+    #         (img_metadata.longitude + longitude_factor * bottom_left_diff[1], img_metadata.latitude + latitude_factor * bottom_left_diff[0]),
+    #         (img_metadata.longitude + longitude_factor * top_left_diff[1], img_metadata.latitude + latitude_factor * top_left_diff[0])])
+    return Polygon([
+        (21.278184192715582, 52.191409373713782),
+        (21.27893210196283, 52.193098789071541),
+        (21.277100379053511, 52.193405046999402),
+        (21.276351223018249, 52.191719635142071),
+        (21.278184192715582, 52.191409373713782)
+    ])
 
 def get_polygon_reversed(polygon: Polygon, try_index: int) -> Polygon:
     x_coords = polygon.exterior.coords.xy[0][0:4]
@@ -174,6 +181,8 @@ if __name__ == "__main__":
     metadata_file_path = f'{data_path}/Photos/EOZ_lot1_WL_RPY_Hgeoid.txt'
 
     geo_json_files_folder_path = f'{data_path}/Classes'
+    geo_json_files_folder_path = '/home/rakusd/Desktop/Uczelnia/WB/Projekt/ImageSegmentation/data/geojsons'
+
     geo_json_files = [f for f in listdir(geo_json_files_folder_path) if isfile(join(geo_json_files_folder_path, f)) and f.endswith(".geojson")] 
 
     image_metadata = get_image_metadata_dataframe(metadata_file_path)
@@ -196,16 +205,17 @@ if __name__ == "__main__":
         img_polygon = get_image_corners(metadata_of_img_to_process)
 
         copy_img_polygon = img_polygon
-        for try_index in range(1):
+        for try_index in range(4):
             img_polygon = get_polygon_reversed(copy_img_polygon, try_index)
             intersections_with_data_classes = [get_intersections_with_polygons(img_polygon, data_class_polygon) for data_class_polygon in data_classes_as_polygons]
 
             object_transformer = PolygonMatrixTransformer()
         
             geojson_points = object_transformer.transform_to_matrix(img_polygon)
-            img_points = np.array([
-                [0, img.size[0] - 1, img.size[0] - 1, 0],
-                [0, 0, img.size[1] - 1, img.size[1] - 1],
+  
+            img_points = np.array([ # geojson uses anticlockwise ordering
+                [0, 0, img.size[0] - 1, img.size[0] - 1],
+                [0, img.size[1] - 1, img.size[1] - 1, 0],
                 [1, 1, 1, 1]
             ])
 
@@ -221,9 +231,9 @@ if __name__ == "__main__":
                 for intersection in intersections_with_data_class:
                     is_any_intersection = True
                     intersection_matrix_pixels = coords_transformer.transform(object_transformer.transform_to_matrix(intersection))
-                    intersection_pixels = zip(intersection_matrix_pixels[0], intersection_matrix_pixels[1])
-                
-                    brush.polygon(list(intersection_pixels), fill=color)
+                    intersection_pixels = list(zip(intersection_matrix_pixels[0], intersection_matrix_pixels[1]))
+
+                    brush.polygon(intersection_pixels, fill=color)
 
             if is_any_intersection:
                 if debug_mode:
