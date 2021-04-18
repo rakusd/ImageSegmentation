@@ -72,7 +72,7 @@ def get_image_corners(img_metadata):
         [0, 0, -drone_height, 1]
     ])
 
-    camera_rotate_below_drone_matrix = get_rotation_matrix(-60, 180, 0)
+    camera_rotate_below_drone_matrix = get_rotation_matrix(-62.5, 177.5, 2.5)
     
     final_camera_matrix = camera_rotate_below_drone_matrix.dot(camera_rotation_matrix.dot(initial_camera_matrix))
 
@@ -112,18 +112,12 @@ def get_image_corners(img_metadata):
     
     # top left corner first, then clockwise
     # x is north in RPY coordinates therefore latitutde is added x coords
-    # return Polygon([(img_metadata.longitude + longitude_factor * top_left_diff[1], img_metadata.latitude + latitude_factor * top_left_diff[0]),
-    #         (img_metadata.longitude + longitude_factor * top_right_diff[1], img_metadata.latitude + latitude_factor * top_right_diff[0]),
-    #         (img_metadata.longitude + longitude_factor * bottom_right_diff[1], img_metadata.latitude + latitude_factor * bottom_right_diff[0]),
-    #         (img_metadata.longitude + longitude_factor * bottom_left_diff[1], img_metadata.latitude + latitude_factor * bottom_left_diff[0]),
-    #         (img_metadata.longitude + longitude_factor * top_left_diff[1], img_metadata.latitude + latitude_factor * top_left_diff[0])])
-    return Polygon([
-        (21.278184192715582, 52.191409373713782),
-        (21.27893210196283, 52.193098789071541),
-        (21.277100379053511, 52.193405046999402),
-        (21.276351223018249, 52.191719635142071),
-        (21.278184192715582, 52.191409373713782)
-    ])
+    return Polygon([(img_metadata.longitude + longitude_factor * top_left_diff[1], img_metadata.latitude + latitude_factor * top_left_diff[0]),
+            (img_metadata.longitude + longitude_factor * top_right_diff[1], img_metadata.latitude + latitude_factor * top_right_diff[0]),
+            (img_metadata.longitude + longitude_factor * bottom_right_diff[1], img_metadata.latitude + latitude_factor * bottom_right_diff[0]),
+            (img_metadata.longitude + longitude_factor * bottom_left_diff[1], img_metadata.latitude + latitude_factor * bottom_left_diff[0]),
+            (img_metadata.longitude + longitude_factor * top_left_diff[1], img_metadata.latitude + latitude_factor * top_left_diff[0])])
+
 
 def get_polygon_reversed(polygon: Polygon, try_index: int) -> Polygon:
     x_coords = polygon.exterior.coords.xy[0][0:4]
@@ -181,7 +175,7 @@ if __name__ == "__main__":
     metadata_file_path = f'{data_path}/Photos/EOZ_lot1_WL_RPY_Hgeoid.txt'
 
     geo_json_files_folder_path = f'{data_path}/Classes'
-    geo_json_files_folder_path = '/home/rakusd/Desktop/Uczelnia/WB/Projekt/ImageSegmentation/data/geojsons'
+    #geo_json_files_folder_path = '/home/rakusd/Desktop/Uczelnia/WB/Projekt/ImageSegmentation/data/geojsons'
 
     geo_json_files = [f for f in listdir(geo_json_files_folder_path) if isfile(join(geo_json_files_folder_path, f)) and f.endswith(".geojson")] 
 
@@ -190,7 +184,7 @@ if __name__ == "__main__":
 
     for img_filename in listdir(images_folder_path): 
         #test
-        if img_filename != "DSC01170.JPG":
+        if img_filename != "DSC01170.JPG" and img_filename != "DSC01169.JPG":
             continue
         #test
         img_full_path = join(images_folder_path, img_filename)
@@ -212,12 +206,19 @@ if __name__ == "__main__":
             object_transformer = PolygonMatrixTransformer()
         
             geojson_points = object_transformer.transform_to_matrix(img_polygon)
-  
-            img_points = np.array([ # geojson uses anticlockwise ordering
-                [0, 0, img.size[0] - 1, img.size[0] - 1],
-                [0, img.size[1] - 1, img.size[1] - 1, 0],
+
+            img_points = np.array([ # our format is clockwise
+                [0, img.size[0] - 1, img.size[0] - 1, 0],
+                [0, 0, img.size[1] - 1, img.size[1] - 1],
                 [1, 1, 1, 1]
             ])
+
+            # if checking with geojson from qgis we need to use anticlockwise
+            # img_points = np.array([ # geojson uses anticlockwise ordering
+            #     [0, 0, img.size[0] - 1, img.size[0] - 1],
+            #     [0, img.size[1] - 1, img.size[1] - 1, 0],
+            #     [1, 1, 1, 1]
+            # ])
 
             coords_transformer = GeoJsonToPixelTransformer(geojson_points, img_points)
 
@@ -241,6 +242,6 @@ if __name__ == "__main__":
                 train_image.save(f"{results_path}/out_{img_filename[:-4]}_{try_index}.png")
 
         #test
-        if img_filename == "DSC01170.JPG":
+        if img_filename == "DSC01169.JPG":
             break
         #test
