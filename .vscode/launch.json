@@ -15,6 +15,18 @@
                 "--result=.",
                 "--debug=True",
             ]
+        },
+        {
+            "name": "SEBA Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--path=F:\\Download\\WD_dane",
+                "--result=F:\\Download\\WD_dane\\Out_Results",
+                "--debug=True",
+            ]
         }
     ]
 }

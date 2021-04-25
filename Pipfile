@@ -10,6 +10,7 @@ numpy = "*"
 pandas = "*"
 shapely = "*"
 pillow = "*"
+pyproj = "*"
 
 [requires]
 python_version = "3.7"
