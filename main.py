@@ -65,24 +65,47 @@ def get_image_corners(img_metadata):
 
     camera_rotation_matrix = get_rotation_matrix(yaw, pitch, roll)
 
-    initial_camera_matrix = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, -drone_height, 1]
-    ])
+    # initial_camera_matrix = np.array([
+    #     [1, 0, 0, 0],
+    #     [0, 1, 0, 0],
+    #     [0, 0, 1, 0],
+    #     [0, 0, -drone_height, 1]
+    # ])
 
-    camera_rotate_below_drone_matrix = get_rotation_matrix(-62.5, 177.5, 2.5)
+    # camera facing up
+    # initial_camera_matrix = np.array([
+    #     [0, -1, 0, 0],
+    #     [1, 0, 0, 0],
+    #     [0, 0, -1, -drone_height],
+    #     [0, 0, 0, 1]
+    # ])
+
+    # camera facing front of plane
+    initial_camera_matrix = np.array([
+        [0, 0, 1, 0],
+        [1, 0, 0, 0],
+        [0, -1, 0, -283],
+        [0, 0, 0, 0]
+    ])
+    # camera facing down
+    # initial_camera_matrix = np.array([
+    #     [0, 1, 0, 0],
+    #     [1, 0, 0, 0],
+    #     [0, 0, 1, -drone_height],
+    #     [0, 0, 0, 1]
+    # ])
+
+    camera_rotate_below_drone_matrix = get_rotation_matrix(0, 90, 0)
     
     final_camera_matrix = camera_rotate_below_drone_matrix.dot(camera_rotation_matrix.dot(initial_camera_matrix))
 
     # TO DO MIGHT BE CHANGED TO READ ROWS INSTEAD OF COLUMNS
-    # right = final_camera_matrix[:3, 0]
-    # up = final_camera_matrix[:3, 1] 
-    # away = final_camera_matrix[:3, 2]
-    right = final_camera_matrix[0, :3]
-    up = final_camera_matrix[1, :3] 
-    away = final_camera_matrix[2, :3]
+    right = final_camera_matrix[:3, 0]
+    up = final_camera_matrix[:3, 1] 
+    away = final_camera_matrix[:3, 2]
+    #right = final_camera_matrix[0, :3]
+    #up = final_camera_matrix[1, :3] 
+    #away = final_camera_matrix[2, :3]
 
 
     right_factor = math.tan(camera_horizontal_angle / 2)
@@ -112,11 +135,17 @@ def get_image_corners(img_metadata):
     
     # top left corner first, then clockwise
     # x is north in RPY coordinates therefore latitutde is added x coords
-    return Polygon([(img_metadata.longitude + longitude_factor * top_left_diff[1], img_metadata.latitude + latitude_factor * top_left_diff[0]),
-            (img_metadata.longitude + longitude_factor * top_right_diff[1], img_metadata.latitude + latitude_factor * top_right_diff[0]),
-            (img_metadata.longitude + longitude_factor * bottom_right_diff[1], img_metadata.latitude + latitude_factor * bottom_right_diff[0]),
-            (img_metadata.longitude + longitude_factor * bottom_left_diff[1], img_metadata.latitude + latitude_factor * bottom_left_diff[0]),
-            (img_metadata.longitude + longitude_factor * top_left_diff[1], img_metadata.latitude + latitude_factor * top_left_diff[0])])
+    # return Polygon([(img_metadata.longitude + longitude_factor * top_left_diff[1], img_metadata.latitude + latitude_factor * top_left_diff[0]),
+    #         (img_metadata.longitude + longitude_factor * top_right_diff[1], img_metadata.latitude + latitude_factor * top_right_diff[0]),
+    #         (img_metadata.longitude + longitude_factor * bottom_right_diff[1], img_metadata.latitude + latitude_factor * bottom_right_diff[0]),
+    #         (img_metadata.longitude + longitude_factor * bottom_left_diff[1], img_metadata.latitude + latitude_factor * bottom_left_diff[0]),
+    #         (img_metadata.longitude + longitude_factor * top_left_diff[1], img_metadata.latitude + latitude_factor * top_left_diff[0])])
+
+    return Polygon([(21.278184192715582, 52.191409373713782),
+        (21.27893210196283, 52.193098789071541 ), 
+        (21.277100379053511, 52.193405046999402 ), 
+        (21.276351223018249, 52.191719635142071 ), 
+        (21.278184192715582, 52.191409373713782 )])
 
 
 def get_polygon_reversed(polygon: Polygon, try_index: int) -> Polygon:
@@ -199,7 +228,7 @@ if __name__ == "__main__":
         img_polygon = get_image_corners(metadata_of_img_to_process)
 
         copy_img_polygon = img_polygon
-        for try_index in range(4):
+        for try_index in range(1):
             img_polygon = get_polygon_reversed(copy_img_polygon, try_index)
             intersections_with_data_classes = [get_intersections_with_polygons(img_polygon, data_class_polygon) for data_class_polygon in data_classes_as_polygons]
 
@@ -207,18 +236,18 @@ if __name__ == "__main__":
         
             geojson_points = object_transformer.transform_to_matrix(img_polygon)
 
-            img_points = np.array([ # our format is clockwise
-                [0, img.size[0] - 1, img.size[0] - 1, 0],
-                [0, 0, img.size[1] - 1, img.size[1] - 1],
-                [1, 1, 1, 1]
-            ])
-
-            # if checking with geojson from qgis we need to use anticlockwise
-            # img_points = np.array([ # geojson uses anticlockwise ordering
-            #     [0, 0, img.size[0] - 1, img.size[0] - 1],
-            #     [0, img.size[1] - 1, img.size[1] - 1, 0],
+            # img_points = np.array([ # our format is clockwise
+            #     [0, img.size[0] - 1, img.size[0] - 1, 0],
+            #     [0, 0, img.size[1] - 1, img.size[1] - 1],
             #     [1, 1, 1, 1]
             # ])
+
+            #if checking with geojson from qgis we need to use anticlockwise
+            img_points = np.array([ # geojson uses anticlockwise ordering
+                [0, 0, img.size[0] - 1, img.size[0] - 1],
+                [0, img.size[1] - 1, img.size[1] - 1, 0],
+                [1, 1, 1, 1]
+            ])
 
             coords_transformer = GeoJsonToPixelTransformer(geojson_points, img_points)
 
@@ -240,6 +269,7 @@ if __name__ == "__main__":
                 if debug_mode:
                     train_image = Image.alpha_composite(img, train_image)
                 train_image.save(f"{results_path}/out_{img_filename[:-4]}_{try_index}.png")
+                print(f"{results_path}/out_{img_filename[:-4]}_{try_index}.png")
 
         #test
         if img_filename == "DSC01169.JPG":
