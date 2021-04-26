@@ -17,10 +17,17 @@ def get_image_metadata_dataframe(path: str):
 
 def get_intersections_with_polygons(polygon_for_intersection: Polygon, polygons_array: "list[Polygon]"):
     intersections = []
+
+    count = 0
     for polygon in polygons_array:
-        intersection = polygon_for_intersection.intersection(polygon)
-        if not intersection.is_empty:
-            intersections.append(intersection)
+        try:
+            intersection = polygon_for_intersection.intersection(polygon)
+            if not intersection.is_empty:
+                intersections.append(intersection)
+        except Exception as e:
+            count += 1
+            print(e)
+    print(f"\n\nNumber of exceptions during calculating intersections {count}\n\n")
     return intersections
 
 
