@@ -10,6 +10,7 @@ from PIL import Image, ImageDraw
 import argparse
 
 
+
 def get_image_metadata_dataframe(path: str):
     return pd.read_csv(path, sep="\t")
 
@@ -91,16 +92,21 @@ if __name__ == "__main__":
 
     offset = load_offset(offset_path)
 
+    image_metadata = get_image_metadata_dataframe(metadata_file_path)
     data_classes_as_polygons = [GeoJsonReader().load(join(geo_json_files_folder_path, path), offset) for path in geo_json_files]
     dictionary_with_p_matrices = PmatrixParser().parse(pmatrix_path)
 
-
     for img_filename in listdir(images_folder_path): 
-        if img_filename != "DSC01170.JPG" and img_filename != "DSC01169.JPG":
-            continue
 
         img_full_path = join(images_folder_path, img_filename)
         if not isfile(img_full_path) or not img_filename.endswith(".JPG"):
+            continue
+
+        metadata_of_img_to_process = image_metadata[image_metadata.Filename == img_filename].iloc[0]
+        roll = abs(metadata_of_img_to_process['roll[deg]'])
+        pitch = abs(metadata_of_img_to_process['pitch[deg]'])
+        
+        if roll > 10 or pitch > 10:
             continue
 
         img = Image.open(img_full_path)
