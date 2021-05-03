@@ -9,6 +9,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 import argparse
 import datetime
+import os
 
 
 def print_message_with_time(message: str):
@@ -84,7 +85,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', help='Path to all data', required=True)
     parser.add_argument('--result', help='Path where results should be produced', required=True)
-    parser.add_argument('--debug', help='Enable image production for debugging purposes')
+    parser.add_argument('--debug', help='Enable image production for debugging purposes', type=bool)
 
     args = args=parser.parse_args()
 
@@ -100,7 +101,9 @@ if __name__ == "__main__":
 
     print_message_with_time('------ Starting program ------')
 
-    geo_json_files_folder_path = f'{data_path}/Classes'
+    # TODO: Uncomment this
+    #geo_json_files_folder_path = f'{data_path}/Classes'
+    geo_json_files_folder_path = f'./data/geojsons/'
     geo_json_files = [f for f in listdir(geo_json_files_folder_path) if isfile(join(geo_json_files_folder_path, f)) and f.endswith(".geojson")] 
 
     print_message_with_time('------ Starting metadata parsing ------')
