@@ -12,8 +12,8 @@
             "console": "integratedTerminal",
             "args": [
                 "--path=/home/rakusd/Desktop/Uczelnia/WB/Dane_Przykładowe",
-                "--result=.",
-                "--debug=True",
+                "--result=/home/rakusd/Desktop/Uczelnia/WB/output_final",
+                //"--debug=false",
             ]
         },
         {

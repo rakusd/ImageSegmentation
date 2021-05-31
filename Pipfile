@@ -11,6 +11,11 @@ pandas = "*"
 shapely = "*"
 pillow = "*"
 pyproj = "*"
+jupyter = "*"
+matplotlib = "*"
+sklearn = "*"
+keras = "*"
+tensorflow = "*"
 
 [requires]
 python_version = "3.7"
