@@ -93,23 +93,23 @@ if __name__ == "__main__":
     data_path = args.path
     results_path = args.result
 
-    images_folder_path = f'{data_path}/Photos/200MSDCF'
-    metadata_file_path = f'{data_path}/Photos/EOZ_lot1_WL_RPY_Hgeoid.txt'
-    pmatrix_path = f'{data_path}/Processing/07_05_2020_WL/1_initial/params/07_05_2020_WL_pmatrix.txt'
-    offset_path = f'{data_path}/Processing/07_05_2020_WL/1_initial/params/07_05_2020_WL_offset.xyz'
+    images_folder_path = f'{data_path}/PHOTO/Photos/200MSDCF'
+    metadata_file_path = f'{data_path}/PHOTO/Photos/EOZ_lot1_WL_RPY_Hgeoid.txt'
+    pmatrix_path = f'{data_path}/19_08_2019_WL_pmatrix.txt'
+    offset_path = f'{data_path}/19_08_2019_WL_offset.xyz'
 
 
     print_message_with_time('------ Starting program ------')
 
     # TODO: Uncomment this
     #geo_json_files_folder_path = f'{data_path}/Classes'
-    geo_json_files_folder_path = f'./data/geojsons/'
+    geo_json_files_folder_path = f'/media/linuxks/Nowy1/PROJEKT_TESTOWY_MINI/ImageSegmentation/data/geojsons/19_08_19'
     geo_json_files = [f for f in listdir(geo_json_files_folder_path) if isfile(join(geo_json_files_folder_path, f)) and f.endswith(".geojson")] 
 
     print_message_with_time('------ Starting metadata parsing ------')
 
     offset = load_offset(offset_path)
-    images_metadata = get_image_metadata_dataframe(metadata_file_path)
+    #images_metadata = get_image_metadata_dataframe(metadata_file_path)
     data_classes_as_polygons = [GeoJsonReader().load(join(geo_json_files_folder_path, path), offset) for path in geo_json_files]
     dictionary_with_p_matrices = PmatrixParser().parse(pmatrix_path)
 
@@ -130,10 +130,12 @@ if __name__ == "__main__":
                 print('Bad image file')
                 continue
 
-            metadata_of_img_to_process = images_metadata[images_metadata.Filename == img_filename].iloc[0]
-            roll = abs(metadata_of_img_to_process['roll[deg]'])
-            pitch = abs(metadata_of_img_to_process['pitch[deg]'])
-            
+            #metadata_of_img_to_process = images_metadata[images_metadata.Filename == img_filename].iloc[0]
+            #roll = abs(metadata_of_img_to_process['roll[deg]'])
+            #pitch = abs(metadata_of_img_to_process['pitch[deg]'])
+            roll = 0
+            pitch = 0
+
             if roll > 10 or pitch > 10:
                 print('Roll > 10 or pitch > 10')
                 continue
@@ -175,8 +177,8 @@ if __name__ == "__main__":
             if is_any_intersection:
                 if debug_mode:
                     train_image = Image.alpha_composite(img, train_image)
-                path = f"{results_path}/out{'_debug' if debug_mode else ''}_{img_filename[:-4]}.png"
-                train_image.save(path)
+                path = f"{results_path}/out{'_debug' if debug_mode else ''}_{img_filename[:-4]}.jpg"
+                train_image.convert('RGB').save(path)
             else:
                 print('No intersections in current image')
         except Exception as e:
